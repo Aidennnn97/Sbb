@@ -10,7 +10,7 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class QuestionController {
-    private final QuestionRepository questionRepository;
+    private final QuestionService questionService;
 
     @GetMapping("/")
     public String root(){
@@ -19,7 +19,7 @@ public class QuestionController {
 
     @GetMapping("/question/list")
     public String list(Model model){    // Model 객체는 자바 클래스와 템플릿 간의 연결고리 역할
-        List<Question> questionList = this.questionRepository.findAll();
+        List<Question> questionList = this.questionService.getList();
         model.addAttribute("questionList", questionList);
         return "question_list";
     }
