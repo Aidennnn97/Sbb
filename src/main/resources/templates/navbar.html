@@ -9,7 +9,7 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link" sec:authorize="isAnonymous()" th:href="@{/user/login}">로그인</a>
-                    <a class="nav-link" sec:authorize="isAuthenticated()" style="cursor: pointer" onclick="this.nextElementSibling.submit();">로그아웃</a>
+                    <a class="nav-link" sec:authorize="isAuthenticated()" href="javascript:;" onclick="this.nextElementSibling.submit();">로그아웃</a>
                     <form hidden th:action="@{/user/logout}" method="post"></form>
                 </li>
                 <li class="nav-item">
