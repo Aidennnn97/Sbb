@@ -4,6 +4,7 @@ import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.answer.AnswerRepository;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.question.QuestionRepository;
+import com.mysite.sbb.question.QuestionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ class SbbApplicationTests {
 	private QuestionRepository questionRepository;
 	@Autowired
 	private AnswerRepository answerRepository;
+
+	@Autowired
+	private QuestionService questionService;
 
 	@Test
 	@DisplayName("질문 생성")
@@ -139,6 +143,16 @@ class SbbApplicationTests {
 
 		assertEquals(1, answerList.size());
 		assertEquals("Yes, It's automatically created", answerList.get(0).getContent());
+	}
+
+	@Test
+	@DisplayName("테스트 데이터 생성")
+	void testJpa12(){
+		for (int i = 1; i <= 300; i++) {
+			String subject = String.format("테스트 데이터입니다: [%03d]", i);
+			String content = "내용 무";
+			this.questionService.create(subject, content);
+		}
 	}
 
 }
