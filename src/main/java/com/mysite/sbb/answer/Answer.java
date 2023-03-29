@@ -18,6 +18,7 @@ public class Answer {
     @Column(columnDefinition = "text")
     private String content;
     private LocalDateTime createDate;
+    private LocalDateTime modifyDate;
     @ManyToOne
     private Question question;
     @ManyToOne
