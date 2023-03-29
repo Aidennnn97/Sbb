@@ -30,7 +30,7 @@ public class QuestionService {
             return this.questionRepository.findAll(pageable);
         }
 
-        Specification<Question> spec = search(kw);
+        Specification<Question> spec = search(kw.trim());
         return this.questionRepository.findAll(spec, pageable);
     }
 
