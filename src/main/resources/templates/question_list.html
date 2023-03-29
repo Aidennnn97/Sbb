@@ -1,5 +1,18 @@
 <html lang="en" layout:decorate="~{layout}">
 <div layout:fragment="content" class="container my-3">
+    <div class="row my-3">
+        <div class="col-6">
+            <a th:href="@{/question/create}" class="btn btn-primary">질문 등록하기</a>
+        </div>
+        <div class="col-6">
+            <form>
+                <div class="input-group">
+                    <input type="text" id="search_kw" class="form-control" name="kw" placeholder="검색어" th:value="${param.kw}">
+                    <button class="btn btn-outline-secondary" type="submit">찾기</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <table class="table">
         <thead class="table-dark">
         <tr class="text-center">
@@ -59,6 +72,5 @@
         </ul>
     </div>
     <!-- 페이징처리 끝 -->
-    <a th:href="@{/question/create}" class="btn btn-primary">질문 등록하기</a>
 </div>
 </html>
