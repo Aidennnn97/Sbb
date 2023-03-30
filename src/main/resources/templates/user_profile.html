@@ -1,0 +1,53 @@
+<html layout:decorate="~{layout}">
+<div layout:fragment="content" class="container my-3">
+    <div class="card text-center">
+        <div class="card-header">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">내 정보</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">작성글</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${user.getUsername()}"></h5>
+                        <p class="card-text" th:text="${user.getEmail()}"></p>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead class="table-dark">
+                            <tr class="text-center">
+                                <th>번호</th>
+                                <th style="width:50%">제목</th>
+                                <th>작성일시</th>
+                                <th>조회수</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="text-center" th:each="question, loop : ${questionList}">
+                                <!--            <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}"></td>-->
+                                <td th:text="${question.id}"></td>
+                                <td>
+                                    <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+                                    <span class="text-danger small ms-2"
+                                          th:if="${#lists.size(question.answerList) > 0}"
+                                          th:text="${#lists.size(question.answerList)}">
+                                    </span>
+                                </td>
+                                <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+                                <td th:if="${question.view != null}" th:text="${question.view}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

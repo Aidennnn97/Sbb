@@ -35,6 +35,11 @@ public class QuestionService {
         return this.questionRepository.findAll(spec, pageable);
     }
 
+    public List<Question> getUserQuestion(String username, int num){
+        Pageable pageable = PageRequest.of(0, num, Sort.by("modifyDate").descending());
+        return this.questionRepository.findAllByUsername(username, pageable);
+    }
+
     public Question getQuestion(Integer id){
         Optional<Question> question = this.questionRepository.findById(id);
         if (question.isPresent()) {
@@ -46,9 +51,12 @@ public class QuestionService {
 
     public void create(String subject, String content, SiteUser siteUser){
         Question q = new Question();
+        Integer cnt = 0;
         q.setSubject(subject);
         q.setContent(content);
         q.setCreateDate(LocalDateTime.now());
+        q.setModifyDate(LocalDateTime.now());
+        q.setView(cnt);
         q.setAuthor(siteUser);
         this.questionRepository.save(q);
     }
