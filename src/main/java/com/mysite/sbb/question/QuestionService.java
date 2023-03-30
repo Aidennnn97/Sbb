@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -84,5 +85,16 @@ public class QuestionService {
                         cb.like(u2.get("username"), "%" + kw + "%"));   // 답변 작성자
             }
         };
+    }
+
+    @Transactional
+    public void updateView(Integer id){
+        Optional<Question> question = this.questionRepository.findById(id);
+        if (question.isPresent()) {
+            Question q = question.get();
+            q.setView(q.getView() + 1);
+        } else {
+            throw new DataNotFoundException("question not found");
+        }
     }
 }

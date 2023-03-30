@@ -3,6 +3,9 @@ package com.mysite.sbb.question;
 import com.mysite.sbb.answer.AnswerForm;
 import com.mysite.sbb.user.SiteUser;
 import com.mysite.sbb.user.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -33,8 +35,34 @@ public class QuestionController {
     }
 
     @GetMapping("/detail/{id}")
-    public String detail(Model model, @PathVariable("id") Integer id, AnswerForm answerForm){
+    public String detail(Model model, @PathVariable("id") Integer id, AnswerForm answerForm, HttpServletRequest req, HttpServletResponse res){
         Question question = this.questionService.getQuestion(id);
+
+        Cookie oldCookie = null;
+        Cookie[] cookies = req.getCookies();
+        if(cookies != null){
+            for(Cookie cookie : cookies){
+                if(cookie.getName().equals("postView")){
+                    oldCookie = cookie;
+                }
+            }
+        }
+        if (oldCookie != null){
+            if(!oldCookie.getValue().contains("[" + id.toString() + "]")){
+                this.questionService.updateView(id);
+                oldCookie.setValue(oldCookie.getValue() + "_[" + id + "]");
+                oldCookie.setPath("/"); // 모든 URL 범위에서 전송
+                oldCookie.setMaxAge(60 * 60 * 24);  // 쿠키 시간 하루
+                res.addCookie(oldCookie);
+            }
+        } else {
+            this.questionService.updateView(id);
+            Cookie newCookie = new Cookie("postView", "[" + id + "]");
+            newCookie.setPath("/");
+            newCookie.setMaxAge(60 * 60 * 24);
+            res.addCookie(newCookie);
+        }
+
         model.addAttribute("question", question);
         return "question_detail";
     }
