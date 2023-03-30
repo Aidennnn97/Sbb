@@ -36,7 +36,7 @@ public class QuestionService {
     }
 
     public List<Question> getUserQuestion(SiteUser user){
-        return this.questionRepository.findAllByAuthor(user);
+        return this.questionRepository.findAllByAuthorOrderByModifyDateDesc(user);
     }
 
     public Question getQuestion(Integer id){
