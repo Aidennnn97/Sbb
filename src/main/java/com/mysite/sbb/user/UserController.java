@@ -62,7 +62,7 @@ public class UserController {
     @GetMapping("/profile")
     public String profile(Model model, Principal principal){
         SiteUser user = this.userService.getUser(principal.getName());
-        List<Question> questionList = this.questionService.getUserQuestion(user.getUsername(), 5);
+        List<Question> questionList = this.questionService.getUserQuestion(user);
         model.addAttribute("user", user);
         model.addAttribute("questionList", questionList);
         return "user_profile";

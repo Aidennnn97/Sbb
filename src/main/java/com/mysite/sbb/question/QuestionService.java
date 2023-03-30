@@ -35,9 +35,8 @@ public class QuestionService {
         return this.questionRepository.findAll(spec, pageable);
     }
 
-    public List<Question> getUserQuestion(String username, int num){
-        Pageable pageable = PageRequest.of(0, num, Sort.by("modifyDate").descending());
-        return this.questionRepository.findAllByUsername(username, pageable);
+    public List<Question> getUserQuestion(SiteUser user){
+        return this.questionRepository.findAllByAuthor(user);
     }
 
     public Question getQuestion(Integer id){
