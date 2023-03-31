@@ -2,6 +2,7 @@ package com.mysite.sbb.question;
 
 import com.mysite.sbb.DataNotFoundException;
 import com.mysite.sbb.answer.Answer;
+import com.mysite.sbb.category.Category;
 import com.mysite.sbb.user.SiteUser;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class QuestionService {
     private final QuestionRepository questionRepository;
-    public Page<Question> getList(int page, String kw){
+    public Page<Question> getList(int page, String kw, String categoryName){
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createDate"));
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
@@ -31,8 +32,29 @@ public class QuestionService {
             return this.questionRepository.findAll(pageable);
         }
 
-        Specification<Question> spec = search(kw.trim());
+        Specification<Question> spec = search(kw.trim(), categoryName);
+
         return this.questionRepository.findAll(spec, pageable);
+    }
+
+    private Specification<Question> search(String kw, String categoryName) {
+        return new Specification<>() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Predicate toPredicate(Root<Question> q, CriteriaQuery<?> query, CriteriaBuilder cb) {
+                query.distinct(true);  // 중복을 제거
+                Join<Question, SiteUser> u1 = q.join("author", JoinType.LEFT);
+                Join<Question, Answer> a = q.join("answerList", JoinType.LEFT);
+                Join<Answer, SiteUser> u2 = a.join("author", JoinType.LEFT);
+                Join<Question, Category> c = q.join("category", JoinType.LEFT);
+                return cb.and(cb.or(cb.like(q.get("subject"), "%" + kw + "%"),  // 제목
+                                cb.like(q.get("content"), "%" + kw + "%"),      // 내용
+                                cb.like(u1.get("username"), "%" + kw + "%"),    // 질문 작성자
+                                cb.like(a.get("content"), "%" + kw + "%"),      // 답변 내용
+                                cb.like(u2.get("username"), "%" + kw + "%")),   // 답변 작성자
+                        cb.like(c.get("name"), "%" + categoryName + "%"));      // 카테고리 이름
+            }
+        };
     }
 
     public List<Question> getUserQuestion(SiteUser user){
@@ -48,7 +70,7 @@ public class QuestionService {
         }
     }
 
-    public void create(String subject, String content, SiteUser siteUser){
+    public void create(String subject, String content, SiteUser siteUser, Category category){
         Question q = new Question();
         Integer cnt = 0;
         q.setSubject(subject);
@@ -57,6 +79,7 @@ public class QuestionService {
         q.setModifyDate(LocalDateTime.now());
         q.setView(cnt);
         q.setAuthor(siteUser);
+        q.setCategory(category);
         this.questionRepository.save(q);
     }
 
@@ -74,24 +97,6 @@ public class QuestionService {
     public void vote(Question question, SiteUser siteUser){
         question.getVoter().add(siteUser);
         this.questionRepository.save(question);
-    }
-
-    private Specification<Question> search(String kw) {
-        return new Specification<>() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public Predicate toPredicate(Root<Question> q, CriteriaQuery<?> query, CriteriaBuilder cb) {
-                query.distinct(true);  // 중복을 제거
-                Join<Question, SiteUser> u1 = q.join("author", JoinType.LEFT);
-                Join<Question, Answer> a = q.join("answerList", JoinType.LEFT);
-                Join<Answer, SiteUser> u2 = a.join("author", JoinType.LEFT);
-                return cb.or(cb.like(q.get("subject"), "%" + kw + "%"), // 제목
-                        cb.like(q.get("content"), "%" + kw + "%"),      // 내용
-                        cb.like(u1.get("username"), "%" + kw + "%"),    // 질문 작성자
-                        cb.like(a.get("content"), "%" + kw + "%"),      // 답변 내용
-                        cb.like(u2.get("username"), "%" + kw + "%"));   // 답변 작성자
-            }
-        };
     }
 
     @Transactional

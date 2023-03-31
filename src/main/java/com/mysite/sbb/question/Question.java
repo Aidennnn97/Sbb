@@ -1,6 +1,7 @@
 package com.mysite.sbb.question;
 
 import com.mysite.sbb.answer.Answer;
+import com.mysite.sbb.category.Category;
 import com.mysite.sbb.user.SiteUser;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -33,4 +34,6 @@ public class Question {
     private SiteUser author;
     @ManyToMany
     Set<SiteUser> voter;
+    @ManyToOne
+    private Category category;
 }

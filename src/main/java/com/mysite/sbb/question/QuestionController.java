@@ -1,6 +1,8 @@
 package com.mysite.sbb.question;
 
 import com.mysite.sbb.answer.AnswerForm;
+import com.mysite.sbb.category.Category;
+import com.mysite.sbb.category.CategoryService;
 import com.mysite.sbb.user.SiteUser;
 import com.mysite.sbb.user.UserService;
 import jakarta.servlet.http.Cookie;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,10 +28,14 @@ import java.security.Principal;
 public class QuestionController {
     private final QuestionService questionService;
     private final UserService userService;
+    private final CategoryService categoryService;
 
-    @GetMapping("/list")
-    public String list(Model model, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "kw", defaultValue = "") String kw){    // Model 객체는 자바 클래스와 템플릿 간의 연결고리 역할
-        Page<Question> paging = this.questionService.getList(page, kw);
+    @GetMapping("/list/{category}")
+    public String list(Model model,
+                       @PathVariable("category") String category,
+                       @RequestParam(value = "page", defaultValue = "0") int page,
+                       @RequestParam(value = "kw", defaultValue = "") String kw){
+        Page<Question> paging = this.questionService.getList(page, kw, category);
         model.addAttribute("paging", paging);
         model.addAttribute("kw", kw);
         return "question_list";
@@ -69,7 +76,9 @@ public class QuestionController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/create")
-    public String questionCreate(QuestionForm questionForm){
+    public String questionCreate(QuestionForm questionForm, Model model){
+        List<Category> categoryList = this.categoryService.getCategoryList();
+        model.addAttribute("categoryList", categoryList);
         return "question_form";
     }
 
@@ -80,8 +89,9 @@ public class QuestionController {
             return "question_form";
         }
         SiteUser siteUser = this.userService.getUser(principal.getName());
-        this.questionService.create(questionForm.getSubject(), questionForm.getContent(), siteUser);
-        return "redirect:/question/list";
+        Category category = this.categoryService.getCategory(questionForm.getCategory());
+        this.questionService.create(questionForm.getSubject(), questionForm.getContent(), siteUser, category);
+        return "redirect:/question/list/qna";
     }
 
     @PreAuthorize("isAuthenticated()")
