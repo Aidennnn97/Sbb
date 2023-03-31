@@ -1,10 +1,13 @@
 package com.mysite.sbb.user;
 
+import com.mysite.sbb.CommonUtil;
 import com.mysite.sbb.DataNotFoundException;
+import com.mysite.sbb.mail.EmailException;
+import com.mysite.sbb.mail.MailService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -13,6 +16,8 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
+    private final CommonUtil  commonUtil;
 
     public SiteUser create(String username, String email, String password){
         SiteUser user = new SiteUser();
@@ -29,6 +34,20 @@ public class UserService {
             return siteUser.get();
         } else {
             throw new DataNotFoundException("siteuser not found");
+        }
+    }
+
+    @Transactional
+    public void modifyPassword(String email) throws EmailException{
+        String tempPassword = commonUtil.getTempPassword();
+        Optional<SiteUser> siteUser = userRepository.findByEmail(email);
+        if (siteUser.isPresent()){
+            SiteUser user = siteUser.get();
+            user.setPassword(passwordEncoder.encode(tempPassword));
+            userRepository.save(user);
+            mailService.sendSimpleMessage(email, tempPassword);
+        } else {
+            throw new DataNotFoundException("해당 이메일의 유저가 없습니다.");
         }
     }
 }

@@ -43,6 +43,9 @@ dependencies {
 	// 마크다운
 	implementation 'org.commonmark:commonmark:0.21.0'
 
+	// 이메일
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
 }
 
 tasks.named('test') {

@@ -1,5 +1,8 @@
 package com.mysite.sbb.user;
 
+import com.mysite.sbb.DataNotFoundException;
+import com.mysite.sbb.mail.EmailException;
+import com.mysite.sbb.mail.TempPasswordForm;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.question.QuestionService;
 import jakarta.validation.Valid;
@@ -66,5 +69,29 @@ public class UserController {
         model.addAttribute("user", user);
         model.addAttribute("questionList", questionList);
         return "user_profile";
+    }
+
+    @GetMapping("/tempPassword")
+    public String sendTempPassword(TempPasswordForm tempPasswordForm){
+        return "temp_password_form";
+    }
+
+    @PostMapping("/tempPassword")
+    public String sendTempPassword(@Valid TempPasswordForm tempPasswordForm, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            return "temp_password_form";
+        }
+        try{
+            userService.modifyPassword(tempPasswordForm.getEmail());
+        } catch (DataNotFoundException e){
+            e.printStackTrace();
+            bindingResult.reject("Email Not Found", e.getMessage());
+            return "temp_password_form";
+        } catch (EmailException e){
+            e.printStackTrace();
+            bindingResult.reject("Send Email Fail", e.getMessage());
+            return "temp_password_form";
+        }
+        return "redirect:/";
     }
 }
