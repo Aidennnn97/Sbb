@@ -24,3 +24,7 @@ spring:
     port: 587
     username: asdf@asdf.com
     password: asdf
+
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: trace

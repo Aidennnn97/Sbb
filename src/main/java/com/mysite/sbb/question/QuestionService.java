@@ -23,13 +23,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class QuestionService {
     private final QuestionRepository questionRepository;
-    public Page<Question> getList(int page, String kw, String categoryName){
+
+    public Page<Question> getList(int page, String kw, String categoryName) {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createDate"));
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
 
         if (kw == null || kw.trim().length() == 0){
-            return this.questionRepository.findAll(pageable);
+            return this.questionRepository.findAllByCategory_Name(pageable, categoryName);
         }
 
         Specification<Question> spec = search(kw.trim(), categoryName);
@@ -47,12 +48,16 @@ public class QuestionService {
                 Join<Question, Answer> a = q.join("answerList", JoinType.LEFT);
                 Join<Answer, SiteUser> u2 = a.join("author", JoinType.LEFT);
                 Join<Question, Category> c = q.join("category", JoinType.LEFT);
-                return cb.and(cb.or(cb.like(q.get("subject"), "%" + kw + "%"),  // 제목
+                return cb.and(
+                        cb.or(
+                                cb.like(q.get("subject"), "%" + kw + "%"),  // 제목
                                 cb.like(q.get("content"), "%" + kw + "%"),      // 내용
                                 cb.like(u1.get("username"), "%" + kw + "%"),    // 질문 작성자
                                 cb.like(a.get("content"), "%" + kw + "%"),      // 답변 내용
                                 cb.like(u2.get("username"), "%" + kw + "%")),   // 답변 작성자
-                        cb.like(c.get("name"), "%" + categoryName + "%"));      // 카테고리 이름
+                        cb.like(
+                                c.get("name"), "%" + categoryName + "%") // category.name = name
+                );
             }
         };
     }
